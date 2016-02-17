@@ -144,7 +144,7 @@ class pool_master(threading.Thread):
             tags = soup.findAll(name='a')
             for tag in tags:
                 
-                #������������쳣
+                
                 try:
                     ret = tag['href']
                 except:
