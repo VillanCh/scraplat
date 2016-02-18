@@ -22,7 +22,20 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="deamons\deamon_task_queue.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="deamons\worker.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="pool\manager.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="scraplat.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="deamons\" />
+    <Folder Include="pool\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

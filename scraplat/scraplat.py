@@ -106,9 +106,7 @@ class pool_master(threading.Thread):
             
         #----------------------------------------------------------------------
         def get_local_urls(self,url=''):
-            '''
-            ��ȡͬһ�������µ�url
-            '''
+
             if url == '':
                 return []
             domain = self.outter.domain
