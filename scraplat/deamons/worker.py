@@ -17,9 +17,11 @@ class worker(threading.Thread):
         self.pages      = set()
         self.url        = ""
         self.md5hash       = hashlib.md5()
+
+
         #Status Flag
         self.is_finished = False
-
+        self.is_working = False
 
     def run(self):
         if self.is_stopped == True:
@@ -27,18 +29,27 @@ class worker(threading.Thread):
 
         while self.is_stopped == False:
             if self.is_finished == False:
+                if self.is_working == False:
+                    self.is_working = True
+                else:
+                    pass
                 if self.url != "":
-                    md5.update(url)
-                    if self.master.visited.has_key(self.md5hash.hexdigest()) != 1:
+                    md5.update(self.url)
+                    if self.master.not_in_visited(self.url) == True:
                         results = get_local_urls(self.url)
                         if results == 1:
                             self.is_finished = True
                         else:
-                            print "[^] " + self.name + " Empty URLs For ", self.url
+                            print "[^] " + self.name + " Empty URLs in ", self.url
                     else:
                         print "[^] " + self.name + " Repeated URLs : ", self.url
                 else:
                     print "[^] " + self.name + " Empty URLs : ", self.url
+                
+                if self.is_working == True:
+                    self.is_working = False
+                else:
+                    pass
             else:
                 pass
 
@@ -126,12 +137,10 @@ class worker(threading.Thread):
             if newpage_flag != False:
                 newpage_flag = False
             """Here to use bdb to check the visited url"""
-            self.md5hash.update(newpage)
-            newpage_md5 = self.hexdigest()
-
-            if self.master.all_sites.has_key(newpage_md5) != 1:
-                print "[^] " + self.name + " Add New Page : " + newpage
-                self.pages.add(newpage)
+            if self.master.not_in_all_sites(newpage) == False:
+                if newpage not in self.pages:
+                    print "[^] " + self.name + " Add New Page : " + newpage
+                    self.pages.add(newpage)
                 if newpage_flag != True:
                     newpage_flag = True
             else:

@@ -1,13 +1,15 @@
 ﻿import threading
 import Queue
-import deamon_task_queue
-import worker
 import hashlib
 try:
     import bsddb
 except:
     print "Error For Importing bsddb"
 
+import deamon_task_queue
+import deamon_collect_urls
+import deamon_all_dead
+import worker
 
 class manager(threading.Thread):
     """The Main Manager"""
@@ -18,10 +20,13 @@ class manager(threading.Thread):
         self.task_size      = task_size
         self.domain         = domain
         self.md5hash        = hashlib.md5()
+
+        self.task_buffer    = Queue.Queue()
              
 
         #Flag
         self.is_stopped     = True
+        self.is_all_dead    = False
         
 
         #BDB:
@@ -36,18 +41,18 @@ class manager(threading.Thread):
         self.deamon_task_queue = deamon_task_queue(master = manager)
         
         """THREAD_STORE_AND_DISPATCH_URL       2collect the results and store them"""
-        self.deamon_manage_urls = deamon_manage_urls(master = manager)
+        self.deamon_collect_urls = deamon_collect_urls(master = manager)
 
         """THREAD_ANALYSIS(multi)   Analysis page"""
         self.workers = []
         self.__init_workers__()
-        self.deamon_manage_worker = deamon_manage_worker(master = manager)
+        #self.deamon_manage_worker = deamon_manage_worker(master = manager)
 
         """THREAD_DEAD_TIME         To check if all tasks have been done"""
-        self.deanmon_all_dead = deanmon_all_dead(master = manager)
+        self.deanmon_all_dead = deamon_all_dead(master = manager)
 
         """THREAD_LOG"""
-        self.deamon_manage_logs = deamon_manage_logs(master = manager)
+        #self.deamon_manage_logs = deamon_manage_logs(master = manager)
     def __init_dbd__(self):
         print "prepare to initial the bdb"
         """
@@ -114,10 +119,21 @@ True
             self.is_stopped = False
         else :
             pass
-
+        self.deamon_collect_urls.start()
+        self.deamon_task_queue.start()
+        self.deamon_all_dead.start()
 
         while self.is_stopped == False:
-            pass
+            for _worker in self.workers:
+                if _worker.url != "":
+                    if _worker.is_finished == False:
+                        _worker.url = self.task_queue.get()
+                    else:
+                        pass
+                else:
+                    pass
+
+
 
     def check_url(self, url = ""):
         if url != "":
@@ -131,19 +147,21 @@ True
     def not_in_visited(self, url = ""):
         flag = self.check_url(url)
         if flag == 0:
-            return True
-        else:
             return False
+        else:
+            return True
     def not_in_all_sites(self, url = ""):
         flag = self.check_url(url)
         if flag == 1:
-            return True
-        elif flag == 0:
-            return True
-        else:
             return False
+        elif flag == 0:
+            return False
+        else:
+            return True
     def add_all_sites(self, url = ""):
-        if self.not_in_all_sites == True:
+        if url == "":
+            return 0
+        if self.not_in_all_sites(url) == True:
             self.md5hash.update(url)
             self.all_sites[self.md5hash.hexdigest()] = url 
             return 1
@@ -154,5 +172,9 @@ True
     def execute(self, tasks = []):
         if tasks != []:
             for task in tasks:
-                if self.not_in_all_sites(task) == True:
-                    flag = self.add_all_sites
+                self.add_all_sites(task)
+                """For other part , we need to add the urls into the task_queue"""
+                self.task_buffer.put(task)
+            print "[^] Initial The Tasks"
+        self.start()
+        
