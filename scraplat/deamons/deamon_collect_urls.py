@@ -3,7 +3,7 @@ import manager
 
 class deamon_collect_urls(threading.Thread):
     """This Class is For Collect The Results From Other Worker"""
-    def __init__(self, name = "deamon_collect_urls", master = None):
+    def __init__(self, master = None, name = "deamon_collect_urls"):
         threading.Thread.__init__(self)
         self.name = name
         self.is_stopped = True

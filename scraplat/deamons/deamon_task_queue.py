@@ -11,7 +11,7 @@ class deamon_task_queue(threading.Thread):
             self.is_stopped = False
         while self.is_stopped == False:
             if self.master.task_queue.qsize() <= self.master.task_size / 2:
-                print "[^] Prepare to fill the task_queue!"
+                #print "[^] Prepare to fill the task_queue!"
                 if self.master.task_buffer.qsize() != 0:
                     while self.master.task_queue.full() == False:
                         if self.master.task_buffer.empty() == True:

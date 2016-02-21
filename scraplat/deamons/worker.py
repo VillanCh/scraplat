@@ -9,10 +9,10 @@ from bs4 import BeautifulSoup
 
 class worker(threading.Thread):
     """This class works as a slave to collect the url"""
-    def __init__(self):
-        threading.Thread.__init__(self, name = None, master = None)
+    def __init__(self, master = None, name = None):
+        threading.Thread.__init__(self, name = name)
         self.is_stopped = True
-        self.name       = name
+        #self.name       = name
         self.master     = master
         self.pages      = set()
         self.url        = ""
@@ -34,17 +34,20 @@ class worker(threading.Thread):
                 else:
                     pass
                 if self.url != "":
-                    md5.update(self.url)
+                    self.md5hash.update(self.url)
                     if self.master.not_in_visited(self.url) == True:
-                        results = get_local_urls(self.url)
+                        results = self.get_local_urls(self.url)
+                        self.master.add_visited(self.url)
                         if results == 1:
                             self.is_finished = True
                         else:
-                            print "[^] " + self.name + " Empty URLs in ", self.url
+                            #print "[^] " + self.name + " Empty URLs in ", self.url
+                            pass
                     else:
                         print "[^] " + self.name + " Repeated URLs : ", self.url
                 else:
-                    print "[^] " + self.name + " Empty URLs : ", self.url
+                    #print "[^] " + self.name + " Empty URLs : ", self.url
+                    pass
                 
                 if self.is_working == True:
                     self.is_working = False
@@ -137,7 +140,7 @@ class worker(threading.Thread):
             if newpage_flag != False:
                 newpage_flag = False
             """Here to use bdb to check the visited url"""
-            if self.master.not_in_all_sites(newpage) == False:
+            if self.master.not_in_all_sites(newpage) == True:
                 if newpage not in self.pages:
                     print "[^] " + self.name + " Add New Page : " + newpage
                     self.pages.add(newpage)
