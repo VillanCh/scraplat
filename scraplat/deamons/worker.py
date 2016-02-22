@@ -9,17 +9,23 @@ from bs4 import BeautifulSoup
 
 class worker(threading.Thread):
     """This class works as a slave to collect the url"""
-    def __init__(self):
-        threading.Thread.__init__(self, name = None, master = None)
+    def __init__(self, master = None, name = None, handler = None):
+        threading.Thread.__init__(self, name = name)
         self.is_stopped = True
-        self.name       = name
+        #self.name       = name
         self.master     = master
         self.pages      = set()
         self.url        = ""
-        self.md5hash       = hashlib.md5()
+        self.md5hash    = hashlib.md5()
+        self.soup       = None
+        
+        #handler interface
+        self.handler    = handler
+
+
         #Status Flag
         self.is_finished = False
-
+        self.is_working = False
 
     def run(self):
         if self.is_stopped == True:
@@ -27,18 +33,30 @@ class worker(threading.Thread):
 
         while self.is_stopped == False:
             if self.is_finished == False:
+                if self.is_working == False:
+                    self.is_working = True
+                else:
+                    pass
                 if self.url != "":
-                    md5.update(url)
-                    if self.master.visited.has_key(self.md5hash.hexdigest()) != 1:
-                        results = get_local_urls(self.url)
+                    self.md5hash.update(self.url)
+                    if self.master.not_in_visited(self.url) == True:
+                        results = self.dig_urls(self.url)
+                        self.master.add_visited(self.url)
                         if results == 1:
                             self.is_finished = True
                         else:
-                            print "[^] " + self.name + " Empty URLs For ", self.url
+                            #print "[^] " + self.name + " Empty URLs in ", self.url
+                            pass
                     else:
                         print "[^] " + self.name + " Repeated URLs : ", self.url
                 else:
-                    print "[^] " + self.name + " Empty URLs : ", self.url
+                    #print "[^] " + self.name + " Empty URLs : ", self.url
+                    pass
+                
+                if self.is_working == True:
+                    self.is_working = False
+                else:
+                    pass
             else:
                 pass
 
@@ -46,16 +64,16 @@ class worker(threading.Thread):
         if self.is_stopped == False:
             self.is_stopped = True
         
-    def get_local_urls(self,url=''):
+    def dig_urls(self,url=''):
 
-        if url == '':
-            return []
+        #if url == '':
+        #    return []
         domain = self.master.domain
-        repeat_time = 0
+        #repeat_time = 0
         pages = set()
         newpage_flag = False
-        data = ""
-            #��ֹurl��ȡ��ס
+        #data = ""
+        """
         while True:
             try:
                 print self.name + "Ready to Open the web!"
@@ -78,9 +96,10 @@ class worker(threading.Thread):
         
         
         print self.name + "Reading the web ..."
-        soup = BeautifulSoup(data)  
+        self.soup = BeautifulSoup(data)  
+        """
         print "..."
-        tags = soup.findAll(name='a')
+        tags = self.soup.findAll(name='a')
         for tag in tags:
             
               
@@ -126,12 +145,10 @@ class worker(threading.Thread):
             if newpage_flag != False:
                 newpage_flag = False
             """Here to use bdb to check the visited url"""
-            self.md5hash.update(newpage)
-            newpage_md5 = self.hexdigest()
-
-            if self.master.all_sites.has_key(newpage_md5) != 1:
-                print "[^] " + self.name + " Add New Page : " + newpage
-                self.pages.add(newpage)
+            if self.master.not_in_all_sites(newpage) == True:
+                if newpage not in self.pages:
+                    print "[^] " + self.name + " Add New Page : " + newpage
+                    self.pages.add(newpage)
                 if newpage_flag != True:
                     newpage_flag = True
             else:
@@ -140,3 +157,37 @@ class worker(threading.Thread):
             return 1
         else:
             return 0
+
+    def get_soup(self, url = ''):
+        if url == '':
+            return 0
+        web         =   None
+        data        =   ""
+        repeat_time =   0
+        while True:
+            try:
+                print self.name + "Ready to Open the web!"
+                time.sleep(1)
+                print self.name + "Opening the web", url
+                web = urllib2.urlopen(url=url,timeout=3)
+                print "Success to Open the web"
+                
+            except:
+                print self.name + "Open Url Failed !!! Repeat"
+                time.sleep(1)
+                repeat_time = repeat_time + 1
+                if repeat_time == 5:
+                    return 0
+            try:
+                data = web.read()
+                break
+            except:
+                print "[!] Read Failed !"
+        
+        
+        print self.name + "Reading the web ..."
+        self.soup = BeautifulSoup(data)  
+        print self.name + "Success Read the Web ..."
+
+    def get_webdata(self, url = '', headers = {}, use_cookie = False):
+        pass

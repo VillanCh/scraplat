@@ -5,9 +5,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>7b93fa9c-cd09-4b24-bc73-aceacbc45fb1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>scraplat.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <StartupFile>main_test.py</StartupFile>
+    <SearchPath>pool\;deamons\</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>scraplat</Name>
@@ -22,10 +21,28 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="deamons\deamon_all_dead.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="deamons\deamon_collect_urls.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="deamons\deamon_logs.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="deamons\deamon_plugin.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="deamons\deamon_task_queue.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="deamons\worker.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="main_test.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="plugin\soup_handler.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="pool\manager.py">
@@ -35,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="deamons\" />
+    <Folder Include="plugin\" />
     <Folder Include="pool\" />
   </ItemGroup>
   <PropertyGroup>
