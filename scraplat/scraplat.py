@@ -353,8 +353,13 @@ class pool_master(threading.Thread):
 
 #lock = threading.RLock()
 #pool = pool_master(thread_size=5,task_size=5,url='http://villanch.top/',domain='121.42.165.233',lock=lock)
-#pool = pool_master(thread_size=3, task_size=3, url="http://blog.helloqiu.pw/", domain='helloqiu.pw', lock=lock)
+pool = pool_master(thread_size=3, task_size=3, url="http://blog.helloqiu.pw/", domain='helloqiu.pw', lock=lock)
 #pool = pool_master(thread_size=5, task_size = 5, url = "http://ilazycat.com/", domain="ilazycat.com", lock=lock)
 #pool = pool_master(thread_size=8, task_size = 10, url = 'http://freebuf.com/', domain='freebuf.com', lock=lock)
+<<<<<<< HEAD
+pool.start_flag = True
+pool.execute(tasks=['http://blog.helloqiu.pw/'])
+=======
 #pool.start_flag = True
 #pool.execute(tasks=['http://freebuf.com/'])
+>>>>>>> c7331246df6a322ab3743f8b9300ef0b05ca03a2

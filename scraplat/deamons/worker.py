@@ -9,14 +9,18 @@ from bs4 import BeautifulSoup
 
 class worker(threading.Thread):
     """This class works as a slave to collect the url"""
-    def __init__(self, master = None, name = None):
+    def __init__(self, master = None, name = None, handler = None):
         threading.Thread.__init__(self, name = name)
         self.is_stopped = True
         #self.name       = name
         self.master     = master
         self.pages      = set()
         self.url        = ""
-        self.md5hash       = hashlib.md5()
+        self.md5hash    = hashlib.md5()
+        self.soup       = None
+        
+        #handler interface
+        self.handler    = handler
 
 
         #Status Flag
@@ -36,7 +40,7 @@ class worker(threading.Thread):
                 if self.url != "":
                     self.md5hash.update(self.url)
                     if self.master.not_in_visited(self.url) == True:
-                        results = self.get_local_urls(self.url)
+                        results = self.dig_urls(self.url)
                         self.master.add_visited(self.url)
                         if results == 1:
                             self.is_finished = True
@@ -60,16 +64,16 @@ class worker(threading.Thread):
         if self.is_stopped == False:
             self.is_stopped = True
         
-    def get_local_urls(self,url=''):
+    def dig_urls(self,url=''):
 
-        if url == '':
-            return []
+        #if url == '':
+        #    return []
         domain = self.master.domain
-        repeat_time = 0
+        #repeat_time = 0
         pages = set()
         newpage_flag = False
-        data = ""
-            #��ֹurl��ȡ��ס
+        #data = ""
+        """
         while True:
             try:
                 print self.name + "Ready to Open the web!"
@@ -92,9 +96,10 @@ class worker(threading.Thread):
         
         
         print self.name + "Reading the web ..."
-        soup = BeautifulSoup(data)  
+        self.soup = BeautifulSoup(data)  
+        """
         print "..."
-        tags = soup.findAll(name='a')
+        tags = self.soup.findAll(name='a')
         for tag in tags:
             
               
@@ -152,3 +157,37 @@ class worker(threading.Thread):
             return 1
         else:
             return 0
+
+    def get_soup(self, url = ''):
+        if url == '':
+            return 0
+        web         =   None
+        data        =   ""
+        repeat_time =   0
+        while True:
+            try:
+                print self.name + "Ready to Open the web!"
+                time.sleep(1)
+                print self.name + "Opening the web", url
+                web = urllib2.urlopen(url=url,timeout=3)
+                print "Success to Open the web"
+                
+            except:
+                print self.name + "Open Url Failed !!! Repeat"
+                time.sleep(1)
+                repeat_time = repeat_time + 1
+                if repeat_time == 5:
+                    return 0
+            try:
+                data = web.read()
+                break
+            except:
+                print "[!] Read Failed !"
+        
+        
+        print self.name + "Reading the web ..."
+        self.soup = BeautifulSoup(data)  
+        print self.name + "Success Read the Web ..."
+
+    def get_webdata(self, url = '', headers = {}, use_cookie = False):
+        pass

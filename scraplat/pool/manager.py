@@ -9,6 +9,7 @@ except:
 import deamon_task_queue
 import deamon_collect_urls
 import deamon_all_dead
+import deamon_logs
 import worker
 
 class manager(threading.Thread):
@@ -109,11 +110,7 @@ True
         self.deamon_all_dead = deamon_all_dead.deamon_all_dead(master = self)
 
         """THREAD_LOG"""
-        #self.deamon_manage_logs = deamon_manage_logs(master = manager)
- 
-
-    
-
+        self.deamon_logs = deamon_logs.deamon_logs(master = manager,name = "deamon_logs")
 
     def run(self):
         print "Prepare to Run the Pool"
@@ -124,6 +121,7 @@ True
         self.deamon_collect_urls.start()
         self.deamon_task_queue.start()
         self.deamon_all_dead.start()
+        self.deamon_logs.start()
 
         while self.is_stopped == False:
             for _worker in self.workers:
@@ -135,7 +133,7 @@ True
                 else:
                     pass
             if self.is_all_dead == True:
-                print "End"
+                return
 
 
 
