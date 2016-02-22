@@ -18,6 +18,7 @@ class worker(threading.Thread):
         self.url        = ""
         self.md5hash    = hashlib.md5()
         self.soup       = None
+        self.webdata    = ""
         
         #handler interface
         self.handler    = handler
@@ -40,7 +41,7 @@ class worker(threading.Thread):
                 if self.url != "":
                     self.md5hash.update(self.url)
                     if self.master.not_in_visited(self.url) == True:
-                        results = self.dig_urls(self.url)
+                        results = self.analyze(self.url)
                         self.master.add_visited(self.url)
                         if results == 1:
                             self.is_finished = True
@@ -63,7 +64,32 @@ class worker(threading.Thread):
     def stop(self):
         if self.is_stopped == False:
             self.is_stopped = True
-        
+
+    def get_webdata(self, url = '', headers = {}, use_cookie = False):
+        if url == '':
+            return 0
+        web         =   None
+        #data        =   ""
+        repeat_time =   0
+        while True:
+            try:
+                print self.name + "Ready to Open the web!"
+                time.sleep(1)
+                print self.name + "Opening the web", url
+                web = urllib2.urlopen(url=url,timeout=3)
+                print "Success to Open the web"
+                
+            except:
+                print self.name + "Open Url Failed !!! Repeat"
+                time.sleep(1)
+                repeat_time = repeat_time + 1
+                if repeat_time == 5:
+                    return 0
+            try:
+                self.webdata = web.read()
+                break
+            except:
+                print "[!] Read Failed !"
     def dig_urls(self,url=''):
 
         #if url == '':
@@ -157,8 +183,8 @@ class worker(threading.Thread):
             return 1
         else:
             return 0
-
     def get_soup(self, url = ''):
+        """
         if url == '':
             return 0
         web         =   None
@@ -183,11 +209,27 @@ class worker(threading.Thread):
                 break
             except:
                 print "[!] Read Failed !"
-        
+        """
         
         print self.name + "Reading the web ..."
-        self.soup = BeautifulSoup(data)  
-        print self.name + "Success Read the Web ..."
+        self.soup = BeautifulSoup(self.webdata)  
+        print self.name + "Success Read the Web ..."          
+    def analyze(self, url):
+        flag = self.get_webdata(url)
+        if flag == 0:
+            return 0
+        #############################################
+        #   if you dont want to use BeautifulSoup   #
+        #   you can change from get_soup            #
+        #############################################
+        flag = self.get_soup
+        if flag == 0:
+            return 0
 
-    def get_webdata(self, url = '', headers = {}, use_cookie = False):
-        pass
+        flag = self.dig_urls(url)
+        if flag == 0:
+            return 0
+        
+
+
+
