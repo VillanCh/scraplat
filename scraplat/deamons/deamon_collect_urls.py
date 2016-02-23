@@ -17,8 +17,12 @@ class deamon_collect_urls(threading.Thread):
             for _worker in self.master.workers:
                 if _worker.is_finished == True:
                     for page in _worker.pages:
-                        self.master.add_all_sites(page)
-                        self.master.task_buffer.put(page)
+                        if self.master.not_in_all_sites(page) == True:
+                            self.master.add_all_sites(page)
+                            self.master.task_buffer.put(page)
+                        else:
+                            pass
+                    _worker.reset()
                     _worker.is_finished = False
                 else:
                     pass

@@ -110,7 +110,7 @@ True
         self.deamon_all_dead = deamon_all_dead.deamon_all_dead(master = self)
 
         """THREAD_LOG"""
-        self.deamon_logs = deamon_logs.deamon_logs(master = manager,name = "deamon_logs")
+        self.deamon_logs = deamon_logs.deamon_logs(master = self,name = "deamon_logs")
 
     def run(self):
         print "Prepare to Run the Pool"
@@ -166,6 +166,7 @@ True
         if self.not_in_all_sites(url) == True:
             self.md5hash.update(url)
             self.all_sites[self.md5hash.hexdigest()] = url 
+            self.all_sites.sync()
             return 1
         else:
             print "[!] Existed URLs"
@@ -176,7 +177,9 @@ True
         if self.not_in_visited(url) == True:
             self.md5hash.update(url)
             self.visited[self.md5hash.hexdigest()] = url
+            self.visited.sync()
             self.all_sites[self.md5hash.hexdigest()] = url
+            self.all_sites.sync()
     def execute(self, tasks = []):
         if tasks != []:
             for task in tasks:

@@ -5,7 +5,7 @@ import time
 class deamon_logs(threading.Thread):
     """This Class is to Output the Logs from Manager"""
     def __init__(self, name = None, master = None):
-        threading.Thread.__init__(self, name)
+        threading.Thread.__init__(self, name = name)
         self.master         = master
         self.is_stopped     = True
 
