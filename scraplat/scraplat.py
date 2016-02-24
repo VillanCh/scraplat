@@ -333,6 +333,14 @@ class pool_master(threading.Thread):
 
 pool = pool_master(thread_size=3, task_size=3, url="http://xxx.xxx/", domain='xxx.xxx', lock=lock)
 
+<<<<<<< HEAD
 pool.start_flag = True
 pool.execute(tasks=['http://xxx.xxx/'])
+=======
+lock = threading.RLock()
+pool = pool_master(thread_size=3, task_size=3, url="http://blog.helloqiu.pw/", domain='helloqiu.pw', lock=lock)
+
+pool.start_flag = True
+pool.execute(tasks=['http://blog.helloqiu.pw/'])
+>>>>>>> 5ea7bd03dd32a69300531e9394f187f852396fa7
 
