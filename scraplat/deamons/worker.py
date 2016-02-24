@@ -230,6 +230,9 @@ class worker(threading.Thread):
         if flag == 0:
             return 0
         
+    def request_webdata(self, url = "", headers = {}, use_cookie = False):
+        pass
+    
 
 
 
