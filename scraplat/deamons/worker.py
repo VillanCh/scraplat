@@ -16,7 +16,6 @@ class worker(threading.Thread):
         self.master     = master
         self.pages      = set()
         self.url        = ""
-        self.md5hash    = hashlib.md5()
         self.soup       = None
         self.webdata    = ""
         
@@ -27,7 +26,7 @@ class worker(threading.Thread):
         #Status Flag
         self.is_finished = False
         self.is_working = False
-
+        self.newpage_flag = False
     def run(self):
         if self.is_stopped == True:
             self.is_stopped = False
@@ -43,7 +42,7 @@ class worker(threading.Thread):
                         self.is_working = True
                     else:
                         pass
-                    self.md5hash.update(self.url)
+                    #self.md5hash.update(self.url)
                     if self.master.not_in_visited(self.url) == True:
                         self.master.add_visited(self.url)
                         results = self.analyze(self.url)
@@ -58,6 +57,8 @@ class worker(threading.Thread):
                         
                     else:
                         print "[^] " + self.name + " Repeated URLs : ", self.url
+                        self.url = ""
+                        self.is_finished = True
                 else:
                     #print "[^] " + self.name + " Empty URLs : ", self.url
                     pass
@@ -105,7 +106,6 @@ class worker(threading.Thread):
         domain = self.master.domain
         #repeat_time = 0
         pages = set()
-        newpage_flag = False
         #data = ""
         """
         while True:
@@ -177,18 +177,16 @@ class worker(threading.Thread):
                 continue
             
             newpage = ret
-            if newpage_flag != False:
-                newpage_flag = False
             """Here to use bdb to check the visited url"""
             if self.master.not_in_all_sites(newpage) == True:
                 if newpage not in self.pages:
                     print "[^] " + self.name + " Add New Page : " + newpage
                     self.pages.add(newpage)
-                if newpage_flag != True:
-                    newpage_flag = True
+                    if self.newpage_flag != True:
+                        self.newpage_flag = True
             else:
                 print "[^] " + self.name + " Existed Page : " + newpage
-        if newpage_flag == True:
+        if self.newpage_flag == True:
             return 1
         else:
             return 0
@@ -238,7 +236,6 @@ class worker(threading.Thread):
         flag = self.dig_urls(url)
         if flag == 0:
             return 0
-
         return 1
     def reset(self):
         self.pages      = set()

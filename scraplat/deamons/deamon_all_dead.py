@@ -86,10 +86,7 @@ class deamon_all_dead(threading.Thread):
                 else:
                     pass
             else:
-                if self.dead_count != 0 :
-                    self.dead_count = 0
-                else:
-                    pass
+                pass
 
     def stop(self):
         if self.is_stopped == False:

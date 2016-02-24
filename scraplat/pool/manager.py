@@ -1,6 +1,7 @@
 ﻿import threading
 import Queue
 import hashlib
+import os
 try:
     import bsddb
 except:
@@ -12,10 +13,19 @@ import deamon_all_dead
 import deamon_logs
 import worker
 
+
 class manager(threading.Thread):
     """The Main Manager"""
     def __init_dbd__(self):
         print "prepare to initial the bdb"
+        print "[#] Check if the db exist"
+        if os.path.exists("all_sites.db"):
+            os.remove('all_sites.db')
+
+        if os.path.exists('visited.db'):
+            os.remove('visited.db')
+        print "[#] Cleared the db"
+            
         """
 >>> import bsddb
 >>> db = bsddb.btopen('spam.db', 'c')
@@ -77,7 +87,8 @@ True
         self.thread_size    = thread_size
         self.task_size      = task_size
         self.domain         = domain
-        self.md5hash        = hashlib.md5()
+        self.md5hash        = None
+
 
         self.task_buffer    = Queue.Queue()
              
@@ -127,22 +138,42 @@ True
             for _worker in self.workers:
                 if _worker.url == "":
                     if _worker.is_finished == False:
-                        _worker.url = self.task_queue.get()
+                        if self.task_queue.qsize() != 0:
+                            _worker.url = self.task_queue.get()
                     else:
                         pass
                 else:
                     pass
             if self.is_all_dead == True:
-                return
+                break
+            #print "Manager Working"
+
+        self.deamon_all_dead.stop()
+        print "[~] deamon_all_dead          stopped"
+        self.deamon_collect_urls.stop()
+        print "[~] deamon_collect_urls      stopped"
+        self.deamon_logs.stop()
+        print "[~] deamon_logs              stopped"
+        self.deamon_task_queue.stop()
+        print "[~] deamon_task_queue        stopped"
+        for _worker in self.workers:
+            _worker.stop()
+            print "[~] worker", _worker.name , "stopped"
+        
+        print "[!] All done!"
+
+        for k, v in self.all_sites.iteritems():
+            print v
 
 
 
     def check_url(self, url = ""):
         if url != "":
+            self.md5hash = hashlib.md5()
             self.md5hash.update(url)
             if self.visited.has_key(self.md5hash.hexdigest()) == 1:
                 return 0
-            elif self.all_sites.has_key(self.md5hash.hexdigest()) == 1:
+            elif self.visited.has_key(self.md5hash.hexdigest()) != 1 and self.all_sites.has_key(self.md5hash.hexdigest()) == 1:
                 return 1
             else:
                 return 2
@@ -164,6 +195,7 @@ True
         if url == "":
             return 0
         if self.not_in_all_sites(url) == True:
+            self.md5hash = hashlib.md5()
             self.md5hash.update(url)
             self.all_sites[self.md5hash.hexdigest()] = url 
             self.all_sites.sync()
@@ -175,6 +207,7 @@ True
         if url == "":
             return 0
         if self.not_in_visited(url) == True:
+            self.md5hash = hashlib.md5()
             self.md5hash.update(url)
             self.visited[self.md5hash.hexdigest()] = url
             self.visited.sync()

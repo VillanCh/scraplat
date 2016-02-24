@@ -6,7 +6,6 @@ import urllib2
 import urlparse
 from    bs4 import  BeautifulSoup
 
-
 class pool_master(threading.Thread):
     def __init__(self, thread_size = 0, task_size = None, url = '', domain = '', lock=None):
         threading.Thread.__init__(self)
@@ -26,12 +25,11 @@ class pool_master(threading.Thread):
 
         self.timer = pool_master.timer(outter=self)
         
-        #��ʼ���������
         self.task_size = task_size
         try:
             self.task_queue = Queue.Queue(task_size)
         except :
-            print "���г�ʼ�����󣡣�"
+            pass
         
         
         if url != '':
@@ -62,9 +60,7 @@ class pool_master(threading.Thread):
 
         def stop(self):
             if self.is_alive != False:
-                self.is_alive = False
-                
-                #time.sleep(5)
+                self.is_alive = False                
     class worker(threading.Thread):
         def __init__(self, group=None, target=None, name=None, args=(), 
                     kwargs=None, verbose=None, outter=None, lock=None, url=''):
@@ -77,8 +73,7 @@ class pool_master(threading.Thread):
             self.url = url
             self.pages = []
             self.name = name
-            self.is_runnable = True
-            
+            self.is_runnable = True           
         def run(self):
             while self.is_runnable:
                 #print self.name + ": I ' m working"
@@ -102,9 +97,6 @@ class pool_master(threading.Thread):
                             self.outter.visited.add(self.url)
                             self.start_flag = False
                             self.finished_flag = True
-                            #self.start_flag = False
-            
-        #----------------------------------------------------------------------
         def get_local_urls(self,url=''):
 
             if url == '':
@@ -198,11 +190,9 @@ class pool_master(threading.Thread):
                 self.lock.release()
                 
             return self.pages
-
         def stop(self):
             if self.is_runnable != False:
                 self.is_runnable = False
-    #��ʼ���߳�
     def __init_threads__(self):
         for i in range(self.thread_size):
             name = "V-%d " % i
@@ -211,20 +201,14 @@ class pool_master(threading.Thread):
             self.threads.append(subthread)
             
             print '[*] creating and starting thread %d total: %d' % (i,self.thread_size)
-        print "[*] init threads completed"
-        
+        print "[*] init threads completed"      
     def __init_tasks__(self):
-        pass
-    
+        pass 
     def execute(self,tasks=[]):
         for task in tasks:
             self.wait_task.put(task)
         if self.is_running != True:
             self.start()
-
-
-
-    #�̳߳���ѭ��
     def run(self):
         self.timer.is_alive = True
         self.timer.start()
@@ -346,20 +330,9 @@ class pool_master(threading.Thread):
             thread.stop()
         self.timer.stop()
                                 
-                                       
-                            
 
+pool = pool_master(thread_size=3, task_size=3, url="http://xxx.xxx/", domain='xxx.xxx', lock=lock)
 
-
-#lock = threading.RLock()
-#pool = pool_master(thread_size=5,task_size=5,url='http://villanch.top/',domain='121.42.165.233',lock=lock)
-pool = pool_master(thread_size=3, task_size=3, url="http://blog.helloqiu.pw/", domain='helloqiu.pw', lock=lock)
-#pool = pool_master(thread_size=5, task_size = 5, url = "http://ilazycat.com/", domain="ilazycat.com", lock=lock)
-#pool = pool_master(thread_size=8, task_size = 10, url = 'http://freebuf.com/', domain='freebuf.com', lock=lock)
-<<<<<<< HEAD
 pool.start_flag = True
-pool.execute(tasks=['http://blog.helloqiu.pw/'])
-=======
-#pool.start_flag = True
-#pool.execute(tasks=['http://freebuf.com/'])
->>>>>>> c7331246df6a322ab3743f8b9300ef0b05ca03a2
+pool.execute(tasks=['http://xxx.xxx/'])
+
